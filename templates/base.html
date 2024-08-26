@@ -1,0 +1,33 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <script src="/static/js/htmx.min.js"></script>
+</head>
+<body>
+    <header hx-swap-oob="true">
+        <nav>
+            <ul>
+                <li><a href="/" hx-get="/" hx-target="#content" hx-swap="innerHTML" >chemistry.software</a></li>
+                <li><a href="/about" hx-get="/about" hx-target="#content" hx-swap="innerHTML">About</a></li>
+                <li><a href="/projects" hx-get="/projects" hx-target="#content" hx-swap="innerHTML">Projects</a></li>
+                <li><a href="/contact" hx-get="/contact" hx-target="#content" hx-swap="innerHTML">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="content">
+        {{ template "content" . }}
+    </main>
+
+    <footer hx-swap-oob="true">
+        <p>&copy; 2024 chemistry.software - Where Software Meets Chemistry</p>
+    </footer>
+</body>
+</html>
+{{ end }}
+
