@@ -23,3 +23,17 @@ go.work.sum
 
 # env file
 .env
+
+# Binary
+chemistry-software-htmx-go
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

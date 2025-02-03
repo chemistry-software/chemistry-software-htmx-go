@@ -1,8 +1,36 @@
-{{ define "content" }}
-<section>
-    <h1>Contact Us</h1>
-    <p>We'd love to hear from you! Get in touch with us to learn more about what we do.</p>
-    <!-- Add contact form or details here -->
+{{ define "contact" }}
+<section class="container">
+    <h1>Get in touch</h1>
+    <p>Ready to revolutionize your chemical processes?</p>
+    
+    <form hx-post="/contact" 
+          hx-swap="outerHTML"
+          hx-trigger="submit"
+          hx-indicator="#submit-indicator">
+        <div class="grid">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+        </div>
+        
+        <div>
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+        </div>
+        
+        <button type="submit">
+            Send Message
+            <span class="htmx-indicator" id="submit-indicator">
+                Sending...
+            </span>
+        </button>
+    </form>
 </section>
 {{ end }}
 
