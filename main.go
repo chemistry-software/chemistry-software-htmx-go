@@ -1,15 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+	"golang.org/x/text/message/catalog"
 )
 
 type PageData struct {
 	IsDark bool
+	Lang   string
+	Trans  *message.Printer
 }
 
 // Custom template functions
@@ -22,6 +30,9 @@ var templateFuncs = template.FuncMap{
 		return i
 	},
 	"now": time.Now, // Make current time available in templates
+	"t": func(p *message.Printer, key message.Reference, args ...interface{}) string {
+		return p.Sprintf(key, args...)
+	},
 }
 
 // Logging middleware
@@ -42,6 +53,17 @@ func main() {
 	devMode := flag.Bool("dev", false, "Enable development mode with verbose logging")
 	flag.Parse()
 
+	// Localization setup
+	english := language.English
+	dutch := language.Dutch
+
+	// Catalog for messages
+	var mc = catalog.NewBuilder()
+
+	// Load translations from JSON files
+	loadTranslations(mc, english, "i18n/en.json")
+	loadTranslations(mc, dutch, "i18n/nl.json")
+
 	// Parse templates with custom functions
 	tmpl, err := template.New("").Funcs(templateFuncs).ParseGlob("templates/*.html")
 	if err != nil {
@@ -55,13 +77,21 @@ func main() {
 	// Routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		isDark := getThemePreference(r)
-		log.Printf("Theme preference: %v", isDark)
-		tmpl.ExecuteTemplate(w, "index.html", PageData{IsDark: isDark})
+		langTag := getLanguagePreference(r, w)
+		p := message.NewPrinter(langTag, message.Catalog(mc))
+
+		data := PageData{IsDark: isDark, Lang: langTag.String(), Trans: p}
+		log.Printf("PageData: %+v", data)
+		tmpl.ExecuteTemplate(w, "index.html", data)
 	})
 
 	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
 		isDark := getThemePreference(r)
-		if err := tmpl.ExecuteTemplate(w, "about.html", PageData{IsDark: isDark}); err != nil {
+		langTag := getLanguagePreference(r, w)
+		p := message.NewPrinter(langTag, message.Catalog(mc))
+
+		data := PageData{IsDark: isDark, Lang: langTag.String(), Trans: p}
+		if err := tmpl.ExecuteTemplate(w, "about.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -69,7 +99,11 @@ func main() {
 
 	http.HandleFunc("/services", func(w http.ResponseWriter, r *http.Request) {
 		isDark := getThemePreference(r)
-		if err := tmpl.ExecuteTemplate(w, "services.html", PageData{IsDark: isDark}); err != nil {
+		langTag := getLanguagePreference(r, w)
+		p := message.NewPrinter(langTag, message.Catalog(mc))
+		data := PageData{IsDark: isDark, Lang: langTag.String(), Trans: p}
+		log.Printf("PageData: %+v", data)
+		if err := tmpl.ExecuteTemplate(w, "services.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -77,7 +111,10 @@ func main() {
 
 	http.HandleFunc("/contact", func(w http.ResponseWriter, r *http.Request) {
 		isDark := getThemePreference(r)
-		if err := tmpl.ExecuteTemplate(w, "contact.html", PageData{IsDark: isDark}); err != nil {
+		langTag := getLanguagePreference(r, w)
+		p := message.NewPrinter(langTag, message.Catalog(mc))
+		data := PageData{IsDark: isDark, Lang: langTag.String(), Trans: p}
+		if err := tmpl.ExecuteTemplate(w, "contact.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -114,6 +151,19 @@ func main() {
 		}
 	})
 
+	// Language toggle endpoint
+	http.HandleFunc("/toggle-language", func(w http.ResponseWriter, r *http.Request) {
+		currentLang := getLanguagePreference(r, w).String()
+		var newLangTag language.Tag
+		if currentLang == "en" {
+			newLangTag = dutch
+		} else {
+			newLangTag = english
+		}
+		setLanguagePreference(w, newLangTag)
+		http.Redirect(w, r, r.Referer(), http.StatusSeeOther) // Redirect back to the referring page
+	})
+
 	// Wrap the default handler with logging middleware
 	defaultMux := http.DefaultServeMux
 	http.DefaultServeMux = http.NewServeMux() // Replace default mux to wrap the handlers
@@ -125,6 +175,25 @@ func main() {
 	}
 	log.Printf("%s server starting on port 8080", logLevel)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// Helper function to load translations from JSON file
+func loadTranslations(mc *catalog.Builder, langTag language.Tag, filename string) {
+	jsonFile, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatalf("Error reading translation file %s: %v", filename, err)
+	}
+
+	var translations map[string]string
+	err = json.Unmarshal(jsonFile, &translations)
+	if err != nil {
+		log.Fatalf("Error parsing JSON from file %s: %v", filename, err)
+	}
+
+	for key, value := range translations {
+		mc.SetString(langTag, key, value)
+	}
+	log.Printf("Loaded %d translations for language %s from %s", len(translations), langTag, filename)
 }
 
 // Helper function to get theme preference from cookie
@@ -149,7 +218,54 @@ func setThemePreference(w http.ResponseWriter, isDark bool) {
 		Value:  theme,
 		Path:   "/",
 		MaxAge: 3600 * 24 * 365, // 1 year
-		// HttpOnly: true, <- makes cookie not accessible to fucking JS
+		// HttpOnly: true, <- makes cookie not accessible to JS (removed for theme.js to work)
 	})
 	log.Println("Set theme cookie:", theme)
+}
+
+// Helper function to get language preference from cookie or Accept-Language header
+func getLanguagePreference(r *http.Request, w http.ResponseWriter) language.Tag {
+	cookie, err := r.Cookie("lang")
+	if err == nil {
+		langTag, err := language.Parse(cookie.Value)
+		if err == nil {
+			log.Println("Language cookie found:", langTag)
+			return langTag // Return language from cookie if valid
+		}
+		log.Println("Invalid language cookie value:", cookie.Value)
+	}
+
+	// Fallback to Accept-Language header
+	acceptLang := r.Header.Get("Accept-Language")
+	userLangs, _, err := language.ParseAcceptLanguage(acceptLang)
+	if err != nil {
+		log.Println("Error parsing Accept-Language header:", err)
+		userLangs = []language.Tag{language.English} // Default to English on error
+	}
+
+	// Check if Dutch is preferred, otherwise default to English
+	preferredLang := language.English
+	for _, lang := range userLangs {
+		if lang.String() == "nl" {
+			preferredLang = language.Dutch
+			break
+		}
+	}
+
+	// Set language cookie if not already set or invalid
+	setLanguagePreference(w, preferredLang)
+	log.Println("Setting language cookie to:", preferredLang)
+	return preferredLang
+}
+
+// Helper function to set language preference in cookie
+func setLanguagePreference(w http.ResponseWriter, langTag language.Tag) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   "lang",
+		Value:  langTag.String(),
+		Path:   "/",
+		MaxAge: 3600 * 24 * 365, // 1 year
+		// HttpOnly: true, <-  Let's keep it accessible to JS if needed, adjust if security is a concern
+	})
+	log.Println("Set language cookie:", langTag.String())
 }

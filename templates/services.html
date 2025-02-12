@@ -1,14 +1,14 @@
 <!-- Services Section -->
 <section id="services" class="container mx-auto py-24 px-4">
     <h2 class="text-4xl font-bold text-center mb-12">
-        Our Services
+        {{t .Trans "Our Services"}}
     </h2>
     <div class="grid md:grid-cols-2 gap-8">
         {{range $i := iterate 2}}
         <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-6">
-            <h3 class="text-2xl font-bold mb-4">Title</h3>
+            <h3 class="text-2xl font-bold mb-4">{{t $.Trans "Service Title"}}</h3>
             <p class="text-gray-600 dark:text-gray-300">
-                Custom Magento webshops tailored for chemical suppliers and distributors. Streamline your online sales with our specialized e-commerce platforms.
+                {{t $.Trans "Custom Magento webshops tailored for chemical suppliers and distributors. Streamline your online sales with our specialized e-commerce platforms."}}
             </p>
         </div>
         {{end}}
