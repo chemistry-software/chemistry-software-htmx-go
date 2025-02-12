@@ -50,7 +50,7 @@
                 title="Switch to dark mode"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
             </button>
             {{end}}
@@ -77,15 +77,79 @@
             <div class="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-purple-600 to-purple-900 blur-3xl opacity-90"></div>
         </section>
 
-        {{ template "about.html" . }}  <!-- Include about.html -->
-        {{ template "services.html" . }} <!-- Include services.html -->
-        {{ template "contact.html" . }}  <!-- Include contact.html -->
+        <section class="container mx-auto py-24 px-4 flex justify-around items-center">
+            <div class="relative group">
+                <a hx-get="/about" hx-target="#content" hx-swap="innerHTML" class="block">
+                    <svg width="150" height="150" viewBox="0 0 100 100" class="animate-spin transition-transform transform group-hover:scale-110">
+                        <title>{{t .Trans "About us"}}</title>
+                        <!-- Nucleus (Gold color) -->
+                        <circle cx="50" cy="50" r="20" fill="#FFD700" />
+                        <!-- Electron shells -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#FFD700" stroke-width="3" stroke-dasharray="5,5" />
+                        <circle cx="50" cy="50" r="60" fill="none" stroke="#FFD700" stroke-width="3" stroke-dasharray="5,5" />
+                        <!-- Electrons (simplified) -->
+                        <circle cx="85" cy="50" r="4" fill="#FFD700" />
+                        <circle cx="15" cy="50" r="4" fill="#FFD700" />
+                        <circle cx="50" cy="85" r="4" fill="#FFD700" />
+                        <circle cx="50" cy="15" r="4" fill="#FFD700" />
+                        {/* Element symbol */}
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12px" fill="black">Au</text>
+                    </svg>
+                </a>
+                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 hidden group-hover:block text-center mt-2 text-lg">
+                    {{t .Trans "About us"}}
+                </div>
+            </div>
 
+            <div class="relative group">
+                <a hx-get="/services" hx-target="#content" hx-swap="innerHTML" class="block">
+                    <svg width="150" height="150" viewBox="0 0 100 100" class="animate-spin transition-transform transform group-hover:scale-110">
+                        <title>{{t .Trans "Services"}}</title>
+                        <!-- Nucleus (Selenium color) -->
+                        <circle cx="50" cy="50" r="20" fill="#FF7F00" />
+                        <!-- Electron shells -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#FF7F00" stroke-width="3" stroke-dasharray="5,5" />
+                        <circle cx="50" cy="50" r="60" fill="none" stroke="#FF7F00" stroke-width="3" stroke-dasharray="5,5" />
+                        <!-- Electrons -->
+                        <circle cx="85" cy="50" r="4" fill="#FF7F00" />
+                        <circle cx="15" cy="50" r="4" fill="#FF7F00" />
+                        <circle cx="50" cy="85" r="4" fill="#FF7F00" />
+                        {/* Element symbol */}
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12px" fill="black">Se</text>
+                    </svg>
+                </a>
+                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 hidden group-hover:block text-center mt-2 text-lg">
+                    {{t .Trans "Services"}}
+                </div>
+            </div>
+
+            <div class="relative group">
+                <a hx-get="/contact" hx-target="#content" hx-swap="innerHTML" class="block">
+                    <svg width="150" height="150" viewBox="0 0 100 100" class="animate-spin transition-transform transform group-hover:scale-110">
+                        <title>{{t .Trans "Contact"}}</title>
+                        <!-- Nucleus (Cobalt color) -->
+                        <circle cx="50" cy="50" r="20" fill="#008080" />
+                        <!-- Electron shells -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#008080" stroke-width="3" stroke-dasharray="5,5" />
+                        <circle cx="50" cy="50" r="60" fill="none" stroke="#008080" stroke-width="3" stroke-dasharray="5,5" />
+                        <!-- Electrons -->
+                        <circle cx="85" cy="50" r="4" fill="#008080" />
+                        <circle cx="15" cy="50" r="4" fill="#008080" />
+                        <circle cx="50" cy="85" r="4" fill="#008080" />
+                        {/* Element symbol */}
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12px" fill="white">Co</text>
+                    </svg>
+                </a>
+                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 hidden group-hover:block text-center mt-2 text-lg">
+                    {{t .Trans "Contact"}}
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
     <footer class="container mx-auto py-6 px-4 text-center text-gray-600 dark:text-gray-300">
-        {{t .Trans "© %d chemistry.software. All rights reserved." now.Year}}
+        ©{{now.Year}} {{t .Trans "chemistry.software. All rights reserved."}}
     </footer>
 </body>
 </html>

@@ -7,7 +7,17 @@ module.exports = {
     "./main.go", // Or any other Go files that might include class names
   ],
   theme: {
-    extend: {},
+    extend: {
+      animation: { // Ensure 'spin' animation is defined
+        spin: 'spin 1s linear infinite',
+      },
+      keyframes: { // Define 'spin' keyframes if not already defined
+        spin: {
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
+        },
+      },
+    },
   },
   plugins: [],
 } 
