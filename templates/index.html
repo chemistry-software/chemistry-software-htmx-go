@@ -1,34 +1,87 @@
-{{ define "index" }}
-<section class="hero">
-    <div class="grid">
-        <div>
-            <h1>Revolutionizing Chemical Software Solutions</h1>
-            <p>Bridging the gap between chemistry and technology with cutting-edge software.</p>
-            <a href="/services" role="button">Explore our solutions</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chemistry.software</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
+    <script src="/static/js/theme.js" defer></script>
+    <link href="/static/css/tailwind.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    <!-- Header -->
+    <header class="container mx-auto flex items-center justify-between py-6 px-4">
+        <a href="/" class="text-xl font-semibold">
+            chemistry.software
+        </a>
+        <div class="flex items-center gap-8">
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
+                <a href="#services" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Services</a>
+                <a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
+            </nav>
+            <div
+                hx-get="/toggle-theme?dark=false"
+                hx-trigger="load"
+                hx-swap="outerHTML"
+            ></div>
         </div>
-        <div style="text-align: center;">
-            <div class="hero-image"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="container mx-auto relative py-24 px-4">
+        <div class="max-w-2xl">
+            <h1 class="text-5xl font-bold mb-6">
+                Revolutionizing Chemical Software Solutions
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+                Bridging the gap between chemistry and technology with cutting-edge software.
+            </p>
+            <a href="#"
+               class="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
+                Explore our solutions
+                <span class="ml-2">→</span>
+            </a>
         </div>
-    </div>
-</section>
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-purple-600 to-purple-900 blur-3xl opacity-90"></div>
+    </section>
 
-<section>
-    <h2>About chemistry.software</h2>
-    <p>With over three decades of experience, ChemSoft Industries combines deep chemistry knowledge with advanced programming expertise to deliver unparalleled software solutions for the chemical industry.</p>
-</section>
+    <!-- About Section -->
+    <section id="about" class="container mx-auto py-24 px-4">
+        <h2 class="text-4xl font-bold text-center mb-8">
+            About chemistry.software
+        </h2>
+        <p class="text-xl text-center text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            With over three decades of experience, ChemSoft Industries combines deep chemistry knowledge with advanced programming expertise to deliver unparalleled software solutions for the chemical industry.
+        </p>
+    </section>
 
-<section>
-    <h2>Our Services</h2>
-    <div class="grid">
-        <article class="service-card">
-            <h3>Chemical Analysis Software</h3>
-            <p>Advanced software solutions for chemical analysis and data processing, designed for modern laboratories.</p>
-        </article>
-        <article class="service-card">
-            <h3>Laboratory Management</h3>
-            <p>Comprehensive LIMS solutions to streamline your laboratory operations and improve efficiency.</p>
-        </article>
-    </div>
-</section>
-{{ end }}
+    <!-- Services Section -->
+    <section id="services" class="container mx-auto py-24 px-4">
+        <h2 class="text-4xl font-bold text-center mb-12">
+            Our Services
+        </h2>
+        <div class="grid md:grid-cols-2 gap-8">
+            {{range $i := iterate 2}}
+            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-6">
+                <h3 class="text-2xl font-bold mb-4">Title</h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    Custom Magento webshops tailored for chemical suppliers and distributors. Streamline your online sales with our specialized e-commerce platforms.
+                </p>
+            </div>
+            {{end}}
+        </div>
+    </section>
 
+    <!-- Contact Section -->
+    <section id="contact" class="container mx-auto py-24 px-4">
+        <h2 class="text-4xl font-bold text-center mb-4">
+            Get in touch
+        </h2>
+        <p class="text-xl text-center text-gray-600 dark:text-gray-300">
+            Ready to revolutionize your chemical processes?
+        </p>
+    </section>
+</body>
+</html>
