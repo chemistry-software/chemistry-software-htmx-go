@@ -11,3 +11,21 @@ document.addEventListener('htmx:afterSettle', function(evt) {
         }
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const isDark = getThemePreference()
+    if (isDark) {
+        document.documentElement.classList.add('dark');
+    }
+})
+
+function getThemePreference() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'theme') {
+            return value === 'dark';
+        }
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}

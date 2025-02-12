@@ -145,11 +145,11 @@ func setThemePreference(w http.ResponseWriter, isDark bool) {
 		theme = "dark"
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:     "theme",
-		Value:    theme,
-		Path:     "/",
-		MaxAge:   3600 * 24 * 365, // 1 year
-		HttpOnly: true,
+		Name:   "theme",
+		Value:  theme,
+		Path:   "/",
+		MaxAge: 3600 * 24 * 365, // 1 year
+		// HttpOnly: true, <- makes cookie not accessible to fucking JS
 	})
 	log.Println("Set theme cookie:", theme)
 }
