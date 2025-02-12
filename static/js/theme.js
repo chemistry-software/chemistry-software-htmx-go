@@ -11,8 +11,3 @@ document.addEventListener('htmx:afterSettle', function(evt) {
         }
     }
 });
-
-// Check system preference on load
-if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.classList.add('dark');
-}

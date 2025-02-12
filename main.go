@@ -55,6 +55,7 @@ func main() {
 	// Routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		isDark := getThemePreference(r)
+		log.Printf("Theme preference: %v", isDark)
 		tmpl.ExecuteTemplate(w, "index.html", PageData{IsDark: isDark})
 	})
 
