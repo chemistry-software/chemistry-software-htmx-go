@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>chemistry.software</title>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
     <script src="/static/js/theme.js" defer></script>
     <link href="/static/css/tailwind.css" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
     <header class="container mx-auto flex items-center justify-between py-6 px-4">
         <a href="/" class="text-xl font-semibold">
             chemistry.software
@@ -45,7 +44,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main id="content" class="container mx-auto">
+    <main id="content" class="container mx-auto flex-grow">
         <!-- Hero Section -->
         <section class="container mx-auto relative py-24 px-4">
             <div class="max-w-2xl">

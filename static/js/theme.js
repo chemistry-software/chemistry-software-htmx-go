@@ -1,5 +1,5 @@
 // Theme toggle functionality
-document.addEventListener('htmx:afterSettle', function(evt) {
+document.addEventListener('htmx:afterSettle', (evt) => {
     if (evt.detail.requestConfig.path.startsWith('/toggle-theme')) {
         const responseURL = evt.detail.xhr.responseURL;
         const urlParams = new URL(responseURL).searchParams;
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 })
 
-function getThemePreference() {
+const getThemePreference = () => {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
         const [name, value] = cookie.trim().split('=');

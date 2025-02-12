@@ -677,6 +677,14 @@ video {
   max-width: 48rem;
 }
 
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
 .items-center {
   align-items: center;
 }
