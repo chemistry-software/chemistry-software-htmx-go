@@ -17,71 +17,58 @@
         </a>
         <div class="flex items-center gap-8">
             <nav class="hidden md:flex items-center gap-8">
-                <a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
-                <a href="#services" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Services</a>
-                <a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
+                <a hx-get="/about" hx-target="#content" hx-swap="innerHTML" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
+                <a hx-get="/services" hx-target="#content" hx-swap="innerHTML" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Services</a>
+                <a hx-get="/contact" hx-target="#content" hx-swap="innerHTML" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
             </nav>
-            <div
+            {{if .IsDark}}
+            <button
+                class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
                 hx-get="/toggle-theme?dark=false"
-                hx-trigger="load"
                 hx-swap="outerHTML"
-            ></div>
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+            {{else}}
+            <button
+                class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                hx-get="/toggle-theme?dark=true"
+                hx-swap="outerHTML"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+            {{end}}
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="container mx-auto relative py-24 px-4">
-        <div class="max-w-2xl">
-            <h1 class="text-5xl font-bold mb-6">
-                Revolutionizing Chemical Software Solutions
-            </h1>
-            <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                Bridging the gap between chemistry and technology with cutting-edge software.
-            </p>
-            <a href="#"
-               class="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
-                Explore our solutions
-                <span class="ml-2">→</span>
-            </a>
-        </div>
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-purple-600 to-purple-900 blur-3xl opacity-90"></div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="container mx-auto py-24 px-4">
-        <h2 class="text-4xl font-bold text-center mb-8">
-            About chemistry.software
-        </h2>
-        <p class="text-xl text-center text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            With over three decades of experience, ChemSoft Industries combines deep chemistry knowledge with advanced programming expertise to deliver unparalleled software solutions for the chemical industry.
-        </p>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="container mx-auto py-24 px-4">
-        <h2 class="text-4xl font-bold text-center mb-12">
-            Our Services
-        </h2>
-        <div class="grid md:grid-cols-2 gap-8">
-            {{range $i := iterate 2}}
-            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-6">
-                <h3 class="text-2xl font-bold mb-4">Title</h3>
-                <p class="text-gray-600 dark:text-gray-300">
-                    Custom Magento webshops tailored for chemical suppliers and distributors. Streamline your online sales with our specialized e-commerce platforms.
+    <!-- Main Content Area -->
+    <main id="content" class="container mx-auto">
+        <!-- Hero Section -->
+        <section class="container mx-auto relative py-24 px-4">
+            <div class="max-w-2xl">
+                <h1 class="text-5xl font-bold mb-6">
+                    Revolutionizing Chemical Software Solutions
+                </h1>
+                <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+                    Bridging the gap between chemistry and technology with cutting-edge software.
                 </p>
+                <a href="#"
+                   class="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
+                    Explore our solutions
+                    <span class="ml-2">→</span>
+                </a>
             </div>
-            {{end}}
-        </div>
-    </section>
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-purple-600 to-purple-900 blur-3xl opacity-90"></div>
+        </section>
+    </main>
 
-    <!-- Contact Section -->
-    <section id="contact" class="container mx-auto py-24 px-4">
-        <h2 class="text-4xl font-bold text-center mb-4">
-            Get in touch
-        </h2>
-        <p class="text-xl text-center text-gray-600 dark:text-gray-300">
-            Ready to revolutionize your chemical processes?
-        </p>
-    </section>
+    <!-- Footer -->
+    <footer class="container mx-auto py-6 px-4 text-center text-gray-600 dark:text-gray-300">
+        &copy; {{ now.Year }} chemistry.software. All rights reserved.
+    </footer>
 </body>
 </html>

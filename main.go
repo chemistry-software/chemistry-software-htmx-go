@@ -21,6 +21,7 @@ var templateFuncs = template.FuncMap{
 		}
 		return i
 	},
+	"now": time.Now, // Make current time available in templates
 }
 
 // Logging middleware
@@ -53,12 +54,38 @@ func main() {
 
 	// Routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.ExecuteTemplate(w, "index.html", PageData{IsDark: false})
+		isDark := getThemePreference(r)
+		tmpl.ExecuteTemplate(w, "index.html", PageData{IsDark: isDark})
+	})
+
+	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+		isDark := getThemePreference(r)
+		if err := tmpl.ExecuteTemplate(w, "about.html", PageData{IsDark: isDark}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+
+	http.HandleFunc("/services", func(w http.ResponseWriter, r *http.Request) {
+		isDark := getThemePreference(r)
+		if err := tmpl.ExecuteTemplate(w, "services.html", PageData{IsDark: isDark}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+
+	http.HandleFunc("/contact", func(w http.ResponseWriter, r *http.Request) {
+		isDark := getThemePreference(r)
+		if err := tmpl.ExecuteTemplate(w, "contact.html", PageData{IsDark: isDark}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
 	// Theme toggle endpoint
 	http.HandleFunc("/toggle-theme", func(w http.ResponseWriter, r *http.Request) {
 		isDark := r.URL.Query().Get("dark") == "true"
+		setThemePreference(w, isDark) // Toggle the preference
 		if isDark {
 			w.Write([]byte(`
 				<button
@@ -97,4 +124,31 @@ func main() {
 	}
 	log.Printf("%s server starting on port 8080", logLevel)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// Helper function to get theme preference from cookie
+func getThemePreference(r *http.Request) bool {
+	cookie, err := r.Cookie("theme")
+	if err != nil {
+		log.Println("Theme cookie not found, defaulting to light mode")
+		return false // Default to light mode if no cookie
+	}
+	log.Println("Theme cookie found:", cookie.Value)
+	return cookie.Value == "dark"
+}
+
+// Helper function to set theme preference in cookie
+func setThemePreference(w http.ResponseWriter, isDark bool) {
+	theme := "light"
+	if isDark {
+		theme = "dark"
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "theme",
+		Value:    theme,
+		Path:     "/",
+		MaxAge:   3600 * 24 * 365, // 1 year
+		HttpOnly: true,
+	})
+	log.Println("Set theme cookie:", theme)
 }
