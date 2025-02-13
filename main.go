@@ -155,13 +155,22 @@ func main() {
 	http.HandleFunc("/toggle-language", func(w http.ResponseWriter, r *http.Request) {
 		currentLang := getLanguagePreference(r, w).String()
 		var newLangTag language.Tag
-		if currentLang == "en" {
-			newLangTag = dutch
+		if currentLang == "nl" {
+			newLangTag = language.English
 		} else {
-			newLangTag = english
+			newLangTag = language.Dutch
 		}
-		setLanguagePreference(w, newLangTag)
-		http.Redirect(w, r, r.Referer(), http.StatusSeeOther) // Redirect back to the referring page
+		setLanguagePreference(w, newLangTag) // Set the new language preference
+
+		isDark := getThemePreference(r)
+		p := message.NewPrinter(newLangTag, message.Catalog(mc))
+		data := PageData{IsDark: isDark, Lang: newLangTag.String(), Trans: p}
+
+		// Execute only the header template with the new language
+		if err := tmpl.ExecuteTemplate(w, "header.html", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
 	// Wrap the default handler with logging middleware
