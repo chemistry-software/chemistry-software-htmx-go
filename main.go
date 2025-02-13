@@ -3,10 +3,14 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
+	"sync"
 	"time"
 
 	"golang.org/x/text/language"
@@ -48,6 +52,11 @@ func loggingMiddleware(next http.Handler, isDev bool) http.Handler {
 		}
 	})
 }
+
+// Rate limiter
+var lastSubmissionTime = make(map[string]time.Time)
+var mu sync.Mutex                         // Mutex to protect the map from race conditions
+var submissionInterval = 10 * time.Second // Minimum interval between submissions (adjust as needed)
 
 func main() {
 	devMode := flag.Bool("dev", false, "Enable development mode with verbose logging")
@@ -110,6 +119,107 @@ func main() {
 	})
 
 	http.HandleFunc("/contact", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			// Rate limiting logic
+			ip := r.RemoteAddr
+			mu.Lock()
+			lastTime, ok := lastSubmissionTime[ip]
+			mu.Unlock()
+
+			if ok && time.Since(lastTime) < submissionInterval {
+				w.WriteHeader(http.StatusTooManyRequests) // 429 status code
+
+				// Prepare data for template execution (only Trans is needed for translation)
+				isDark := getThemePreference(r) // You can reuse this, or just set to false
+				langTag := getLanguagePreference(r, w)
+				p := message.NewPrinter(langTag, message.Catalog(mc))
+				data := PageData{IsDark: isDark, Lang: langTag.String(), Trans: p}
+
+				// Execute the rate limit error template
+				if err := tmpl.ExecuteTemplate(w, "contact_error_ratelimit.html", data); err != nil {
+					http.Error(w, "Failed to render rate limit error message", http.StatusInternalServerError)
+					log.Printf("Template execution error for rate limit: %v", err)
+					return // Stop processing if template error
+				}
+				return // Stop processing the rest of the handler for rate limited requests
+			}
+
+			// Handle form submission
+			err := r.ParseForm()
+			if err != nil {
+				http.Error(w, "Error parsing form", http.StatusBadRequest)
+				return
+			}
+
+			name := r.Form.Get("name")
+			email := r.Form.Get("email")
+			messageText := r.Form.Get("message")
+
+			telegramBotToken := os.Getenv("TELEGRAM_BOT_TOKEN") // Get token from environment variable
+			telegramChatID := os.Getenv("TELEGRAM_CHAT_ID")     // Get chat ID from environment variable
+
+			if telegramBotToken == "" {
+				log.Println("TELEGRAM_BOT_TOKEN environment variable not set!")
+				w.WriteHeader(http.StatusInternalServerError)
+				tmpl.ExecuteTemplate(w, "contact.html", PageData{ /* ... */ }) // Re-render contact form with error message
+				return
+			}
+
+			if telegramChatID == "" {
+				log.Println("TELEGRAM_CHAT_ID environment variable not set!")
+				w.WriteHeader(http.StatusInternalServerError)
+				tmpl.ExecuteTemplate(w, "contact.html", PageData{ /* ... */ }) // Re-render contact form with error message
+				return
+			}
+
+			telegramAPIURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", telegramBotToken)
+			messageToSend := fmt.Sprintf("New contact form submission:\nName: %s\nEmail: %s\nMessage:\n%s", name, email, messageText)
+			formData := url.Values{
+				"chat_id": {telegramChatID},
+				"text":    {messageToSend},
+			}
+
+			resp, err := http.PostForm(telegramAPIURL, formData)
+			if err != nil {
+				log.Printf("Error sending message to Telegram: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				tmpl.ExecuteTemplate(w, "contact.html", PageData{ /* ... */ }) // Re-render contact form with error message
+				return
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				bodyBytes, _ := ioutil.ReadAll(resp.Body)
+				log.Printf("Telegram API error: %s, Status Code: %d", string(bodyBytes), resp.StatusCode)
+				w.WriteHeader(http.StatusInternalServerError)
+				tmpl.ExecuteTemplate(w, "contact.html", PageData{ /* ... */ }) // Re-render contact form with error message
+				return
+			}
+
+			// Update last submission time on success
+			mu.Lock()
+			lastSubmissionTime[ip] = time.Now()
+			mu.Unlock()
+
+			// On success, send a success message back to the client
+			w.WriteHeader(http.StatusOK)
+
+			// Prepare data for template execution (only Trans is needed for translation)
+			isDark := getThemePreference(r)        // You can reuse this, or just set to false, doesn't matter for this template
+			langTag := getLanguagePreference(r, w) // Same here
+			p := message.NewPrinter(langTag, message.Catalog(mc))
+			data := PageData{IsDark: isDark, Lang: langTag.String(), Trans: p}
+
+			// Execute a small template to render the success message with translation
+			if err := tmpl.ExecuteTemplate(w, "contact_success.html", data); err != nil {
+				http.Error(w, "Failed to render success message", http.StatusInternalServerError)
+				log.Printf("Template execution error: %v", err) // Log template error
+				return
+			}
+			return
+		}
+
+		// For GET request, render the contact form as before
 		isDark := getThemePreference(r)
 		langTag := getLanguagePreference(r, w)
 		p := message.NewPrinter(langTag, message.Catalog(mc))

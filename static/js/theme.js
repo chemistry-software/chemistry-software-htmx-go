@@ -29,3 +29,18 @@ const getThemePreference = () => {
     }
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
+
+document.addEventListener("DOMContentLoaded", (event) => {
+    document.body.addEventListener('htmx:beforeSwap', function(evt) {
+        if (evt.detail.xhr.status === 429) {
+            // https://theprimeagen.github.io/fem-htmx/lessons/htmx-basics/htmx-swap
+            // allow 429 responses to swap as we are using this as a signal that
+            // a form was submitted with bad data and want to rerender with the
+            // errors
+            //
+            // set isError to false to avoid error logging in console
+            evt.detail.shouldSwap = true;
+            evt.detail.isError = false;
+        }
+    });
+})
